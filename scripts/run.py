@@ -13,7 +13,7 @@ DEFAULT_DOUBAO_VOICE = "zh_male_jieshuoxiaoming_uranus_bigtts"
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Agent-friendly wrapper for ppt-narrator with WPS-safe defaults.",
+        description="Agent-first wrapper for ppt-narrator with WPS-safe defaults.",
     )
     parser.add_argument("pptx", type=Path, help="Source PPTX.")
     parser.add_argument("--output", "-o", type=Path, required=True, help="Output directory.")
@@ -102,7 +102,7 @@ def _find_repo_root() -> Path | None:
 
 
 def _is_repo_root(path: Path) -> bool:
-    return (path / "pyproject.toml").exists() and (path / "src" / "ppt_narrator").is_dir()
+    return (path / "SKILL.md").exists() and (path / "pyproject.toml").exists() and (path / "src" / "ppt_narrator").is_dir()
 
 
 if __name__ == "__main__":

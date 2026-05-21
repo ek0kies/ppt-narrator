@@ -1,17 +1,63 @@
 # ppt-narrator
 
-`ppt-narrator` is a local-first CLI for turning a PowerPoint deck with speaker
-notes into structured narration assets.
+`ppt-narrator` is an agent-first Codex Skill for turning a PowerPoint deck with
+speaker notes into a WPS-friendly narrated PPTX. The Python CLI under `src/` is
+the bundled runtime that makes the Skill deterministic and testable.
 
-Current MVP:
+## Agent-first Usage
 
-- Read `.pptx` speaker notes.
-- Export `notes.md` and `manifest.json`.
-- Generate per-slide `.wav` audio through dry-run placeholders or a TTS provider.
-- Reuse externally generated per-slide audio files from any TTS tool.
-- Write optional auto-advance PPTX copies with embedded per-slide audio.
+This repository itself is the Skill root:
 
-## Usage
+```text
+SKILL.md
+agents/openai.yaml
+scripts/run.py
+src/ppt_narrator/
+```
+
+The expected user experience is natural language first:
+
+```text
+Create a WPS-friendly narrated PPTX from this deck.
+```
+
+The agent should then choose the right audio source, output directory, and
+verification steps. Non-technical users should not need to know CLI flags.
+
+Agent default behavior:
+
+- keep the source PPTX unchanged
+- use speaker notes as narration text
+- use Doubao built-in TTS when configured
+- accept external per-slide audio from any TTS tool
+- write an editable PPTX, not an MP4
+- use `transition-sound` for WPS-friendly autoplay
+
+Wrapper example:
+
+```bash
+python3 scripts/run.py slides.pptx \
+  --provider doubao \
+  --tts-config volcengine.local.json \
+  --output output-dir \
+  --overwrite
+```
+
+For external audio:
+
+```bash
+python3 scripts/run.py slides.pptx \
+  --audio-input-dir path/to/audio \
+  --output output-dir \
+  --overwrite
+```
+
+The original PPTX is never modified.
+
+## CLI Runtime
+
+The CLI is the implementation layer used by the Skill. It is still useful for
+development, testing, and automation.
 
 ```bash
 PYTHONPATH=src python3 -m ppt_narrator.cli path/to/slides.pptx --output output-dir
@@ -29,39 +75,12 @@ PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --audio-trig
 PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --audio-input-dir path/to/audio --audio-trigger transition-sound --overwrite
 ```
 
-The original PPTX is never modified.
-
-## Agent-first Usage
-
-This repository includes a repo-local Codex Skill at `skills/ppt-narrator/`.
-The Skill is the preferred entrypoint for non-technical users: the user can ask
-an agent to create a WPS-friendly narrated PPTX, while the agent calls the CLI
-with stable defaults.
-
-Agent default behavior:
-
-- keep the source PPTX unchanged
-- use speaker notes as narration text
-- use Doubao built-in TTS when configured
-- accept external per-slide audio from any TTS tool
-- write an editable PPTX, not an MP4
-- use `transition-sound` for WPS-friendly autoplay
-
-Wrapper example:
+Dry-run agent smoke test:
 
 ```bash
-python3 skills/ppt-narrator/scripts/run.py slides.pptx \
-  --provider doubao \
-  --tts-config volcengine.local.json \
-  --output output-dir \
-  --overwrite
-```
-
-For external audio:
-
-```bash
-python3 skills/ppt-narrator/scripts/run.py slides.pptx \
-  --audio-input-dir path/to/audio \
+python3 scripts/run.py slides.pptx \
+  --provider dry-run \
+  --slide-limit 1 \
   --output output-dir \
   --overwrite
 ```

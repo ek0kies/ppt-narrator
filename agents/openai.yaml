@@ -1,0 +1,3 @@
+display_name: PPT Narrator
+short_description: Create WPS-friendly narrated PPTX decks from speaker notes or per-slide audio.
+default_prompt: Create an auto-playing narrated PPTX from the provided deck. Keep the source PPTX unchanged, prefer transition-sound playback, use Doubao built-in TTS when configured, accept external per-slide audio when provided, and do not produce MP4.

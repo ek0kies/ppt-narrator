@@ -1,3 +1,0 @@
-display_name: PPT Narrator
-short_description: Generate WPS-friendly narrated PPTX decks from speaker notes or per-slide audio.
-default_prompt: Use ppt-narrator to create an auto-playing narrated PPTX from the provided deck. Prefer transition-sound playback, keep the source deck unchanged, and avoid MP4 output.
