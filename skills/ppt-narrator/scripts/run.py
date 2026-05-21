@@ -41,7 +41,7 @@ def main() -> int:
         )
         return 2
 
-    repo_root = _find_repo_root()
+    runtime_src = _find_runtime_src()
     env = os.environ.copy()
     command = [sys.executable, "-m", "ppt_narrator.cli", str(args.pptx), "--output", str(args.output)]
 
@@ -70,9 +70,9 @@ def main() -> int:
         command.append("--overwrite")
 
     cwd = None
-    if repo_root:
-        cwd = str(repo_root)
-        env["PYTHONPATH"] = str(repo_root / "src")
+    if runtime_src:
+        cwd = str(runtime_src.parent.parent)
+        env["PYTHONPATH"] = str(runtime_src)
 
     return subprocess.run(command, cwd=cwd, env=env, check=False).returncode
 
@@ -89,20 +89,19 @@ def _resolve_provider(args: argparse.Namespace) -> str | None:
     return None
 
 
-def _find_repo_root() -> Path | None:
+def _find_runtime_src() -> Path | None:
     env_root = os.getenv("PPT_NARRATOR_REPO", "").strip()
+    candidates: list[Path] = []
     if env_root:
         root = Path(env_root).expanduser().resolve()
-        if _is_repo_root(root):
-            return root
-    for candidate in Path(__file__).resolve().parents:
-        if _is_repo_root(candidate):
+        candidates.extend([root / "src", root / "runtime" / "src"])
+    script_path = Path(__file__).resolve()
+    for parent in script_path.parents:
+        candidates.extend([parent / "runtime" / "src", parent / "src"])
+    for candidate in candidates:
+        if (candidate / "ppt_narrator").is_dir():
             return candidate
     return None
-
-
-def _is_repo_root(path: Path) -> bool:
-    return (path / "SKILL.md").exists() and (path / "pyproject.toml").exists() and (path / "src" / "ppt_narrator").is_dir()
 
 
 if __name__ == "__main__":

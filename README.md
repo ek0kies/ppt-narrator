@@ -1,28 +1,41 @@
 # ppt-narrator
 
-`ppt-narrator` is an agent-first Codex Skill for turning a PowerPoint deck with
-speaker notes into a WPS-friendly narrated PPTX. The Python CLI under `src/` is
-the bundled runtime that makes the Skill deterministic and testable.
+`ppt-narrator` is an installable Codex Skill for turning a PowerPoint deck with
+speaker notes into a WPS-friendly narrated PPTX. It is designed for agent-first
+usage: users give the Agent a PPTX and the Agent installs/uses the skill instead
+of asking the user to copy prompts or remember CLI flags.
 
 ## Agent-first Usage
 
-This repository itself is the Skill root:
+Install the skill from this private GitHub repo with the standard Codex
+skill-installer:
 
-```text
-SKILL.md
-agents/openai.yaml
-scripts/run.py
-src/ppt_narrator/
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo ek0kies/ppt-narrator \
+  --path skills/ppt-narrator
 ```
 
-The expected user experience is natural language first:
+The installable skill directory is self-contained:
+
+```text
+skills/ppt-narrator/
+├── SKILL.md
+├── agents/openai.yaml
+├── scripts/run.py
+└── runtime/src/ppt_narrator/
+```
+
+After installation, restart Codex to pick up the skill. The expected user
+experience is natural language first:
 
 ```text
 Create a WPS-friendly narrated PPTX from this deck.
 ```
 
 The agent should then choose the right audio source, output directory, and
-verification steps. Non-technical users should not need to know CLI flags.
+verification steps. Non-technical users should not need to know install internals
+or runtime flags.
 
 Agent default behavior:
 
@@ -36,7 +49,17 @@ Agent default behavior:
 Wrapper example:
 
 ```bash
-python3 scripts/run.py slides.pptx \
+python3 skills/ppt-narrator/scripts/run.py slides.pptx \
+  --provider doubao \
+  --tts-config volcengine.local.json \
+  --output output-dir \
+  --overwrite
+```
+
+When running from an installed skill directory, use:
+
+```bash
+python3 ~/.codex/skills/ppt-narrator/scripts/run.py slides.pptx \
   --provider doubao \
   --tts-config volcengine.local.json \
   --output output-dir \
@@ -46,7 +69,7 @@ python3 scripts/run.py slides.pptx \
 For external audio:
 
 ```bash
-python3 scripts/run.py slides.pptx \
+python3 skills/ppt-narrator/scripts/run.py slides.pptx \
   --audio-input-dir path/to/audio \
   --output output-dir \
   --overwrite
@@ -78,7 +101,7 @@ PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --audio-inpu
 Dry-run agent smoke test:
 
 ```bash
-python3 scripts/run.py slides.pptx \
+python3 skills/ppt-narrator/scripts/run.py slides.pptx \
   --provider dry-run \
   --slide-limit 1 \
   --output output-dir \

@@ -1,23 +1,23 @@
 ---
 name: ppt-narrator
-description: Agent-first skill for creating WPS-friendly narrated PPTX decks from PowerPoint speaker notes or externally generated per-slide audio. Use when a user asks to add voice-over, narration, TTS, automatic slide audio, or auto page turning to a PPTX without producing MP4.
+description: Installable agent-first skill for creating WPS-friendly narrated PPTX decks from PowerPoint speaker notes or externally generated per-slide audio. Use when a user asks to add voice-over, narration, TTS, automatic slide audio, or auto page turning to a PPTX without producing MP4.
 ---
 
 # ppt-narrator
 
-This repository is a Codex Skill first. The Python CLI under `src/` is the
-bundled runtime that makes the skill deterministic and testable.
+This is an installable Skill. It includes its own bundled Python runtime under
+`runtime/src`, so an agent can install it from GitHub and run it without asking
+the user to copy prompts or remember CLI flags.
 
 ## User Experience
 
-The user should only need to provide:
+The user should only provide:
 
 - a source `.pptx`
 - optionally a TTS config or an external audio folder
 - optionally an output directory
 
-Do not ask the user to memorize CLI flags. Choose the execution path and run the
-wrapper script.
+Choose the execution path and run `scripts/run.py`.
 
 ## Default Outcome
 
@@ -40,13 +40,13 @@ Create a new editable PPTX that:
 
 ## Run
 
-Prefer the wrapper:
+Prefer the bundled wrapper:
 
 ```bash
 python3 scripts/run.py path/to/slides.pptx --output output-dir
 ```
 
-Useful variations:
+Doubao:
 
 ```bash
 python3 scripts/run.py path/to/slides.pptx \
@@ -56,12 +56,16 @@ python3 scripts/run.py path/to/slides.pptx \
   --overwrite
 ```
 
+External audio:
+
 ```bash
 python3 scripts/run.py path/to/slides.pptx \
   --audio-input-dir path/to/audio \
   --output output-dir \
   --overwrite
 ```
+
+Dry-run structural test:
 
 ```bash
 python3 scripts/run.py path/to/slides.pptx \
