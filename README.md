@@ -1,7 +1,7 @@
 # ppt-narrator
 
 `ppt-narrator` is an AI Agent Native Skill for turning a PowerPoint deck with
-speaker notes into a WPS-friendly narrated PPTX. It is designed for agent-first
+speaker notes into an editable auto-playing narrated PPTX. It is designed for agent-first
 usage: humans give an Agent a PPTX, and the Agent installs/checks/uses the skill
 instead of asking the human to copy commands or configure runtime details.
 
@@ -20,7 +20,7 @@ clone or download the repository, copy/use that skill root, then run:
 - scripts/doctor.sh
 - tests/smoke.sh
 
-Then use it to create a WPS-friendly narrated PPTX from my source PPTX.
+Then use it to create an editable auto-playing narrated PPTX from my source PPTX.
 Do not generate MP4. Keep the source PPTX unchanged.
 ```
 
@@ -85,7 +85,7 @@ reload to pick up metadata.
 The expected user experience is natural language first:
 
 ```text
-Create a WPS-friendly narrated PPTX from this deck.
+Create an editable auto-playing narrated PPTX from this deck.
 ```
 
 The agent should then choose the right audio source, output directory, and
@@ -99,7 +99,7 @@ Agent default behavior:
 - use Doubao built-in TTS when configured
 - accept external per-slide audio from any TTS tool
 - write an editable PPTX, not an MP4
-- use `transition-sound` for WPS-friendly autoplay
+- use `transition-sound` for presentation-app-compatible autoplay
 
 Installed skill wrapper example:
 
@@ -213,9 +213,9 @@ Doubao voice modes:
 `--write-pptx` creates a copy with generated audio files embedded into
 `ppt/media/` and slide transition times set from the audio duration. Add
 `--advance-padding-ms` to leave extra time after each page narration.
-For WPS playback tests, use `--pptx-audio-format mp3 --direct-audio-start` to
+For presentation-app compatibility tests, use `--pptx-audio-format mp3 --direct-audio-start` to
 embed MP3 media and start the audio timing node when each slide loads.
-If WPS still refuses media autoplay, use `--audio-trigger transition-sound` to
+If a presentation app refuses media autoplay, use `--audio-trigger transition-sound` to
 bind each narration file to the slide transition sound instead of a visible
 audio object.
 

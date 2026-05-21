@@ -103,7 +103,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--pptx-audio-format",
         choices=["source", "mp3"],
         default="source",
-        help="Audio format embedded into PPTX. Use mp3 for better WPS compatibility.",
+        help="Audio format embedded into PPTX. Use mp3 for better presentation-app compatibility.",
     )
     parser.add_argument(
         "--visible-audio-icon",
@@ -113,7 +113,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--direct-audio-start",
         action="store_true",
-        help="Start the embedded p:audio timing node when the slide loads. Useful for WPS autoplay compatibility tests.",
+        help="Start the embedded p:audio timing node when the slide loads. Useful for presentation-app autoplay compatibility tests.",
     )
     parser.add_argument(
         "--audio-trigger",

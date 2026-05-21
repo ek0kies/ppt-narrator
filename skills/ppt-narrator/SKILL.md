@@ -1,6 +1,6 @@
 ---
 name: ppt-narrator
-description: AI Agent Native, self-installing, self-checking skill for creating WPS-friendly narrated PPTX decks from PowerPoint speaker notes or externally generated per-slide audio. Use when a user asks an AI Agent to install or use a PPT narration skill, add voice-over, generate TTS narration, attach per-slide audio, or create an auto-advancing PPTX without producing MP4.
+description: AI Agent Native, self-installing, self-checking skill for creating editable auto-playing narrated PPTX decks from PowerPoint speaker notes or externally generated per-slide audio. Use when a user asks an AI Agent to install or use a PPT narration skill, add voice-over, generate TTS narration, attach per-slide audio, or create an auto-advancing PPTX without producing MP4.
 ---
 
 # ppt-narrator
@@ -39,7 +39,7 @@ Use this skill when the user asks for any of these:
 
 - add narration or voice-over to a PowerPoint/PPTX
 - generate TTS from speaker notes
-- make a WPS-friendly PPTX that auto-plays audio and auto-advances slides
+- make an auto-playing narrated PPTX that auto-plays audio and auto-advances slides
 - attach externally generated per-slide audio to a PPTX
 - avoid MP4 and keep the output editable as PPTX
 
@@ -77,7 +77,7 @@ Create a new editable PPTX that:
 - keeps the source PPTX unchanged
 - reads speaker notes as narration text
 - creates or reuses one audio file per slide
-- binds each audio file to slide transition sound for WPS-friendly autoplay
+- binds each audio file to slide transition sound for presentation-app-compatible autoplay
 - sets slide advance time from audio duration
 - does not generate MP4
 
@@ -151,7 +151,7 @@ scripts/run.sh path/to/slides.pptx \
 | `ffprobe not found` | Continue for WAV files; warn that MP3/M4A duration probing may fail. |
 | External audio file missing | Tell the Agent/user exactly which `page-XXX.*` file is missing. |
 | Doubao auth/network error | Do not retry endlessly. Check config/env, then ask for valid credentials or use external audio. |
-| WPS media object does not autoplay | Use default `transition-sound`; do not switch to MP4. |
+| Media object does not autoplay | Use default `transition-sound`; do not switch to MP4. |
 
 ## External Audio Contract
 
@@ -189,4 +189,4 @@ tests/smoke.sh
 - Never require the human to copy commands one by one when the Agent can run
   install, doctor, and run scripts itself.
 - Do not suggest MP4 unless the user explicitly changes the boundary.
-- For WPS playback, prefer transition sound over media-object autoplay.
+- For broad presentation-app playback compatibility, prefer transition sound over media-object autoplay.

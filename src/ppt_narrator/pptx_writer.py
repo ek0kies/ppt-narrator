@@ -118,7 +118,7 @@ def _prepare_audio_for_embed(audio: SlideAudio, output_dir: Path, embed_audio_fo
     target = target_dir / f"page-{audio.slide_index:03d}.mp3"
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
-        raise RuntimeError("ffmpeg is required to create WPS-compatible MP3 PPTX audio")
+        raise RuntimeError("ffmpeg is required to create presentation-app-compatible MP3 PPTX audio")
     result = subprocess.run(
         [
             ffmpeg,

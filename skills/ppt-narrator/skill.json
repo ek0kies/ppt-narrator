@@ -2,7 +2,7 @@
   "schema": "ai-agent-native-skill.v1",
   "name": "ppt-narrator",
   "version": "0.1.0",
-  "description": "Create WPS-friendly narrated PPTX decks from speaker notes or externally generated per-slide audio.",
+  "description": "Create editable auto-playing narrated PPTX decks from speaker notes or externally generated per-slide audio.",
   "source": {
     "type": "github",
     "url": "https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator",

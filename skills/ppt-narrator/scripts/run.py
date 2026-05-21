@@ -13,7 +13,7 @@ DEFAULT_DOUBAO_VOICE = "zh_male_jieshuoxiaoming_uranus_bigtts"
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Agent-first wrapper for ppt-narrator with WPS-safe defaults.",
+        description="Agent-first wrapper for ppt-narrator with presentation-app-compatible defaults.",
     )
     parser.add_argument("pptx", type=Path, help="Source PPTX.")
     parser.add_argument("--output", "-o", type=Path, required=True, help="Output directory.")
