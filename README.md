@@ -5,10 +5,23 @@ speaker notes into a WPS-friendly narrated PPTX. It is designed for agent-first
 usage: users give the Agent a PPTX and the Agent installs/uses the skill instead
 of asking the user to copy prompts or remember CLI flags.
 
-## Agent-first Usage
+## Give This To An AI Agent
 
-Install the skill from this private GitHub repo with the standard Codex
-skill-installer:
+Human users should not run the setup manually. Give this to the Agent:
+
+```text
+Install and enable the private GitHub Skill ek0kies/ppt-narrator at path skills/ppt-narrator.
+After installing, run its scripts/install.sh and scripts/doctor.sh.
+Then use it to create a WPS-friendly narrated PPTX from my source PPTX.
+Do not generate MP4. Keep the source PPTX unchanged.
+```
+
+The Agent should use the standard Codex skill installer, then run the skill's
+own install/doctor scripts and proceed only after checks pass.
+
+## Skill Package
+
+Install target for Agents:
 
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -21,13 +34,21 @@ The installable skill directory is self-contained:
 ```text
 skills/ppt-narrator/
 ├── SKILL.md
+├── requirements.txt
 ├── agents/openai.yaml
+├── scripts/install.sh
+├── scripts/doctor.sh
+├── scripts/run.sh
 ├── scripts/run.py
-└── runtime/src/ppt_narrator/
+├── runtime/src/ppt_narrator/
+└── tests/smoke.sh
 ```
 
-After installation, restart Codex to pick up the skill. The expected user
-experience is natural language first:
+After installation, restart Codex to pick up the skill metadata. The runtime can
+also be called directly by the installing Agent before restart via
+`scripts/run.sh`.
+
+The expected user experience is natural language first:
 
 ```text
 Create a WPS-friendly narrated PPTX from this deck.
@@ -46,30 +67,28 @@ Agent default behavior:
 - write an editable PPTX, not an MP4
 - use `transition-sound` for WPS-friendly autoplay
 
-Wrapper example:
+Installed skill wrapper example:
 
 ```bash
-python3 skills/ppt-narrator/scripts/run.py slides.pptx \
+python3 ~/.codex/skills/ppt-narrator/scripts/run.sh slides.pptx \
   --provider doubao \
   --tts-config volcengine.local.json \
   --output output-dir \
   --overwrite
 ```
 
-When running from an installed skill directory, use:
+Self-check:
 
 ```bash
-python3 ~/.codex/skills/ppt-narrator/scripts/run.py slides.pptx \
-  --provider doubao \
-  --tts-config volcengine.local.json \
-  --output output-dir \
-  --overwrite
+~/.codex/skills/ppt-narrator/scripts/install.sh
+~/.codex/skills/ppt-narrator/scripts/doctor.sh
+~/.codex/skills/ppt-narrator/tests/smoke.sh
 ```
 
 For external audio:
 
 ```bash
-python3 skills/ppt-narrator/scripts/run.py slides.pptx \
+python3 ~/.codex/skills/ppt-narrator/scripts/run.sh slides.pptx \
   --audio-input-dir path/to/audio \
   --output output-dir \
   --overwrite
@@ -101,7 +120,7 @@ PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --audio-inpu
 Dry-run agent smoke test:
 
 ```bash
-python3 skills/ppt-narrator/scripts/run.py slides.pptx \
+python3 skills/ppt-narrator/scripts/run.sh slides.pptx \
   --provider dry-run \
   --slide-limit 1 \
   --output output-dir \
