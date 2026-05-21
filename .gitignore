@@ -1,9 +1,9 @@
 .pycache/
 __pycache__/
 *.py[cod]
+.DS_Store
 .venv/
 dist/
 build/
 *.egg-info/
 *_ppt_narrator/
-
