@@ -11,6 +11,19 @@ return the final PPTX path.
 
 The skill includes its own bundled Python runtime under `runtime/src`.
 
+## Canonical Install Source
+
+When another Agent needs to install this skill, give it the full GitHub skill
+URL instead of only a repo name:
+
+```text
+https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator
+```
+
+The Agent should install it with the standard Codex skill installer, using
+existing GitHub credentials for the private repository, then run
+`scripts/install.sh` and `scripts/doctor.sh`.
+
 ## When To Use
 
 Use this skill when the user asks for any of these:

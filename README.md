@@ -10,7 +10,10 @@ of asking the user to copy prompts or remember CLI flags.
 Human users should not run the setup manually. Give this to the Agent:
 
 ```text
-Install and enable the private GitHub Skill ek0kies/ppt-narrator at path skills/ppt-narrator.
+Install and enable this private GitHub Codex Skill:
+https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator
+
+Use existing GitHub credentials if the repository is private.
 After installing, run its scripts/install.sh and scripts/doctor.sh.
 Then use it to create a WPS-friendly narrated PPTX from my source PPTX.
 Do not generate MP4. Keep the source PPTX unchanged.
@@ -22,6 +25,13 @@ own install/doctor scripts and proceed only after checks pass.
 ## Skill Package
 
 Install target for Agents:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --url https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator
+```
+
+Equivalent repo/path form:
 
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
