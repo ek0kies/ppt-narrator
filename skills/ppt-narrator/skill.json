@@ -1,0 +1,39 @@
+{
+  "schema": "ai-agent-native-skill.v1",
+  "name": "ppt-narrator",
+  "version": "0.1.0",
+  "description": "Create WPS-friendly narrated PPTX decks from speaker notes or externally generated per-slide audio.",
+  "source": {
+    "type": "github",
+    "url": "https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator",
+    "repo": "https://github.com/ek0kies/ppt-narrator",
+    "path": "skills/ppt-narrator",
+    "ref": "main"
+  },
+  "entrypoints": {
+    "install": "scripts/install.sh",
+    "doctor": "scripts/doctor.sh",
+    "run": "scripts/run.sh",
+    "smoke": "tests/smoke.sh"
+  },
+  "runtime": {
+    "type": "python",
+    "min_version": "3.9",
+    "source_path": "runtime/src",
+    "requirements": "requirements.txt"
+  },
+  "defaults": {
+    "output_format": "pptx",
+    "playback_trigger": "transition-sound",
+    "tts_provider": "doubao",
+    "doubao_voice_mode": "builtin",
+    "doubao_resource_id": "seed-tts-2.0",
+    "doubao_voice": "zh_male_jieshuoxiaoming_uranus_bigtts",
+    "mp4": false
+  },
+  "inputs": {
+    "required": ["pptx"],
+    "optional": ["output", "tts_config", "audio_input_dir", "voice", "slide_limit"]
+  },
+  "outputs": ["pptx", "notes_md", "manifest_json", "audio_dir", "verification"]
+}

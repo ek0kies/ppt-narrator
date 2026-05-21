@@ -1,30 +1,53 @@
 # ppt-narrator
 
-`ppt-narrator` is an installable Codex Skill for turning a PowerPoint deck with
+`ppt-narrator` is an AI Agent Native Skill for turning a PowerPoint deck with
 speaker notes into a WPS-friendly narrated PPTX. It is designed for agent-first
-usage: users give the Agent a PPTX and the Agent installs/uses the skill instead
-of asking the user to copy prompts or remember CLI flags.
+usage: humans give an Agent a PPTX, and the Agent installs/checks/uses the skill
+instead of asking the human to copy commands or configure runtime details.
 
 ## Give This To An AI Agent
 
 Human users should not run the setup manually. Give this to the Agent:
 
 ```text
-Install and enable this private GitHub Codex Skill:
+Install and enable this AI Agent Native Skill from GitHub:
 https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator
 
-Use existing GitHub credentials if the repository is private.
-After installing, run its scripts/install.sh and scripts/doctor.sh.
+Treat skills/ppt-narrator as the skill root.
+Use your native skill installation mechanism. If no native installer exists,
+clone or download the repository, copy/use that skill root, then run:
+- scripts/install.sh
+- scripts/doctor.sh
+- tests/smoke.sh
+
 Then use it to create a WPS-friendly narrated PPTX from my source PPTX.
 Do not generate MP4. Keep the source PPTX unchanged.
 ```
 
-The Agent should use the standard Codex skill installer, then run the skill's
-own install/doctor scripts and proceed only after checks pass.
+The Agent should use existing GitHub credentials if the repository is private.
+The Agent should proceed only after install, doctor, and smoke checks pass.
 
 ## Skill Package
 
 Install target for Agents:
+
+```text
+https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator
+```
+
+Generic installation contract:
+
+```text
+1. Fetch repository https://github.com/ek0kies/ppt-narrator.
+2. Use skills/ppt-narrator as the skill root.
+3. Read skill.json and SKILL.md.
+4. Run scripts/install.sh.
+5. Run scripts/doctor.sh.
+6. Run tests/smoke.sh.
+7. Use scripts/run.sh for real PPTX work.
+```
+
+Optional Codex-compatible install example:
 
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -44,6 +67,7 @@ The installable skill directory is self-contained:
 ```text
 skills/ppt-narrator/
 ├── SKILL.md
+├── skill.json
 ├── requirements.txt
 ├── agents/openai.yaml
 ├── scripts/install.sh
@@ -54,9 +78,9 @@ skills/ppt-narrator/
 └── tests/smoke.sh
 ```
 
-After installation, restart Codex to pick up the skill metadata. The runtime can
-also be called directly by the installing Agent before restart via
-`scripts/run.sh`.
+After installation, the runtime can be called directly by the installing Agent
+via `scripts/run.sh`. Platforms with a skill registry may require restart or
+reload to pick up metadata.
 
 The expected user experience is natural language first:
 
@@ -80,7 +104,8 @@ Agent default behavior:
 Installed skill wrapper example:
 
 ```bash
-python3 ~/.codex/skills/ppt-narrator/scripts/run.sh slides.pptx \
+SKILL_DIR=/path/to/installed/ppt-narrator
+python3 "$SKILL_DIR/scripts/run.sh" slides.pptx \
   --provider doubao \
   --tts-config volcengine.local.json \
   --output output-dir \
@@ -90,15 +115,17 @@ python3 ~/.codex/skills/ppt-narrator/scripts/run.sh slides.pptx \
 Self-check:
 
 ```bash
-~/.codex/skills/ppt-narrator/scripts/install.sh
-~/.codex/skills/ppt-narrator/scripts/doctor.sh
-~/.codex/skills/ppt-narrator/tests/smoke.sh
+SKILL_DIR=/path/to/installed/ppt-narrator
+"$SKILL_DIR/scripts/install.sh"
+"$SKILL_DIR/scripts/doctor.sh"
+"$SKILL_DIR/tests/smoke.sh"
 ```
 
 For external audio:
 
 ```bash
-python3 ~/.codex/skills/ppt-narrator/scripts/run.sh slides.pptx \
+SKILL_DIR=/path/to/installed/ppt-narrator
+python3 "$SKILL_DIR/scripts/run.sh" slides.pptx \
   --audio-input-dir path/to/audio \
   --output output-dir \
   --overwrite

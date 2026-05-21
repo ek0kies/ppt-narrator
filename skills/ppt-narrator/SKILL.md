@@ -1,13 +1,13 @@
 ---
 name: ppt-narrator
-description: Agent-native, self-installing, self-checking skill for creating WPS-friendly narrated PPTX decks from PowerPoint speaker notes or externally generated per-slide audio. Use when a user asks an AI Agent to install or use a PPT narration skill, add voice-over, generate TTS narration, attach per-slide audio, or create an auto-advancing PPTX without producing MP4.
+description: AI Agent Native, self-installing, self-checking skill for creating WPS-friendly narrated PPTX decks from PowerPoint speaker notes or externally generated per-slide audio. Use when a user asks an AI Agent to install or use a PPT narration skill, add voice-over, generate TTS narration, attach per-slide audio, or create an auto-advancing PPTX without producing MP4.
 ---
 
 # ppt-narrator
 
-This skill is for AI Agents. Do not make the human user perform step-by-step
-setup. The Agent should install, check, repair when possible, run, verify, and
-return the final PPTX path.
+This skill is for any capable AI Agent, not a Codex-only workflow. Do not make
+the human user perform step-by-step setup. The Agent should install, check,
+repair when possible, run, verify, and return the final PPTX path.
 
 The skill includes its own bundled Python runtime under `runtime/src`.
 
@@ -20,9 +20,18 @@ URL instead of only a repo name:
 https://github.com/ek0kies/ppt-narrator/tree/main/skills/ppt-narrator
 ```
 
-The Agent should install it with the standard Codex skill installer, using
-existing GitHub credentials for the private repository, then run
-`scripts/install.sh` and `scripts/doctor.sh`.
+The Agent should use its native skill installation mechanism. If the runtime has
+no native installer, the Agent should fetch the repository, treat
+`skills/ppt-narrator` as the skill root, read `skill.json` and `SKILL.md`, then
+run:
+
+```bash
+scripts/install.sh
+scripts/doctor.sh
+tests/smoke.sh
+```
+
+Use existing GitHub credentials if the repository is private.
 
 ## When To Use
 
@@ -74,19 +83,23 @@ Create a new editable PPTX that:
 
 ## Agent Runbook
 
-1. Locate this skill directory.
-2. Run `scripts/install.sh`.
-3. Run `scripts/doctor.sh`.
-4. Choose the audio source:
+1. Install/fetch the skill from the canonical GitHub URL if it is not already
+   available.
+2. Locate the skill root directory.
+3. Read `skill.json` for machine-readable entrypoints.
+4. Run `scripts/install.sh`.
+5. Run `scripts/doctor.sh`.
+6. Run `tests/smoke.sh` unless time or environment constraints prevent it.
+7. Choose the audio source:
    - If `audio_input_dir` is provided, use external audio.
    - Else if `tts_config`, `PPT_NARRATOR_TTS_CONFIG`, or `DOUBAO_TTS_API_KEY`
      exists, use Doubao built-in TTS.
    - Else if the user only needs a structural test, use dry-run.
    - Else ask for a TTS config/API key or external audio folder.
-5. Run `scripts/run.sh`.
-6. Verify `manifest.json` and the generated PPTX exist.
-7. Run `unzip -t <output.pptx>` when available.
-8. Reply with the generated PPTX path and any remaining warnings.
+8. Run `scripts/run.sh`.
+9. Verify `manifest.json` and the generated PPTX exist.
+10. Run `unzip -t <output.pptx>` when available.
+11. Reply with the generated PPTX path and any remaining warnings.
 
 ## Commands
 
