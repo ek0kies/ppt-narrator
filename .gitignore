@@ -1,0 +1,9 @@
+.pycache/
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+build/
+*.egg-info/
+*_ppt_narrator/
+
