@@ -13,6 +13,7 @@ from ppt_narrator.cli import main
 from ppt_narrator.pipeline import NarrationOptions, run_narration
 from ppt_narrator.pptx_notes import extract_slide_notes
 from ppt_narrator.tts import DOUBAO_DEFAULT_SPEAKER, DoubaoTTSProvider, build_tts_provider
+from ppt_narrator.update import UpdateOptions, run_update
 
 
 class PptNarratorTests(unittest.TestCase):
@@ -77,7 +78,10 @@ class PptNarratorTests(unittest.TestCase):
                 self.assertIn("advClick=\"0\"", slide_xml)
                 self.assertIn("advTm=", slide_xml)
                 rels_xml = package.read("ppt/slides/_rels/slide1.xml.rels").decode("utf-8")
+                self.assertIn("<p:sndAc>", slide_xml)
+                self.assertNotIn("<p:audio>", slide_xml)
                 self.assertIn("/relationships/audio", rels_xml)
+                self.assertNotIn("office/2007/relationships/media", rels_xml)
 
     def test_pipeline_can_start_audio_timing_node_directly(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -92,6 +96,7 @@ class PptNarratorTests(unittest.TestCase):
                     output_dir=output,
                     write_pptx=True,
                     direct_audio_start=True,
+                    audio_trigger="media",
                 )
             )
 
@@ -157,6 +162,100 @@ class PptNarratorTests(unittest.TestCase):
             with zipfile.ZipFile(result.narrated_pptx) as package:
                 slide_xml = package.read("ppt/slides/slide1.xml").decode("utf-8")
                 self.assertIn("advTm=\"2500\"", slide_xml)
+
+    def test_update_changes_one_slide_and_reuses_unchanged_audio(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            pptx = tmp_path / "sample.pptx"
+            initial_output = tmp_path / "initial"
+            update_output = tmp_path / "updated"
+            request = tmp_path / "update_request.json"
+            _write_sample_pptx(pptx)
+
+            initial = run_narration(
+                NarrationOptions(
+                    input_pptx=pptx,
+                    output_dir=initial_output,
+                    write_pptx=True,
+                    audio_trigger="transition-sound",
+                )
+            )
+            request.write_text(
+                json.dumps(
+                    {
+                        "slides": [
+                            {
+                                "index": 1,
+                                "text": "更新后的第一页讲稿。",
+                            }
+                        ]
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            updated = run_update(
+                UpdateOptions(
+                    manifest_path=initial.manifest_json,
+                    request_path=request,
+                    output_dir=update_output,
+                    provider="dry-run",
+                    overwrite=False,
+                )
+            )
+
+            self.assertEqual(updated.updated_slide_indexes, [1])
+            self.assertTrue(updated.narrated_pptx and updated.narrated_pptx.exists())
+            notes = updated.notes_markdown.read_text(encoding="utf-8")
+            self.assertIn("更新后的第一页讲稿。", notes)
+            manifest = json.loads(updated.manifest_json.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["slides"][0]["audio"]["provider"], "dry-run")
+            self.assertTrue(manifest["slides"][0]["audio"]["path"].startswith(str(update_output.resolve())))
+            self.assertEqual(
+                manifest["slides"][1]["audio"]["path"],
+                str((initial_output / "audio" / "page-002.wav").resolve()),
+            )
+            with zipfile.ZipFile(updated.narrated_pptx) as package:
+                self.assertIn("ppt/media/ppt-narrator-page-001.wav", package.namelist())
+                self.assertIn("ppt/media/ppt-narrator-page-002.wav", package.namelist())
+
+    def test_update_can_replace_one_slide_with_external_audio(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            pptx = tmp_path / "sample.pptx"
+            initial_output = tmp_path / "initial"
+            update_output = tmp_path / "updated"
+            external_audio = tmp_path / "replacement.wav"
+            request = tmp_path / "update_request.json"
+            _write_sample_pptx(pptx)
+            write_silence_wav(external_audio, 4.0)
+
+            initial = run_narration(
+                NarrationOptions(
+                    input_pptx=pptx,
+                    output_dir=initial_output,
+                    write_pptx=True,
+                    audio_trigger="transition-sound",
+                )
+            )
+            request.write_text(
+                json.dumps({"slides": [{"index": 2, "audio_path": str(external_audio)}]}),
+                encoding="utf-8",
+            )
+
+            updated = run_update(
+                UpdateOptions(
+                    manifest_path=initial.manifest_json,
+                    request_path=request,
+                    output_dir=update_output,
+                )
+            )
+
+            manifest = json.loads(updated.manifest_json.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["slides"][1]["audio"]["provider"], "external")
+            self.assertEqual(manifest["slides"][1]["audio"]["path"], str(external_audio.resolve()))
+            self.assertEqual(manifest["slides"][1]["audio"]["duration_seconds"], 4.0)
 
     def test_slide_limit_processes_prefix_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

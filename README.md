@@ -44,7 +44,8 @@ Generic installation contract:
 4. Run scripts/install.sh.
 5. Run scripts/doctor.sh.
 6. Run tests/smoke.sh.
-7. Use scripts/run.sh for real PPTX work.
+7. Use scripts/run.sh for new PPTX work.
+8. Use scripts/update.sh for conversation-driven revisions of an existing result.
 ```
 
 Optional Codex-compatible install example:
@@ -74,6 +75,8 @@ skills/ppt-narrator/
 ├── scripts/doctor.sh
 ├── scripts/run.sh
 ├── scripts/run.py
+├── scripts/update.sh
+├── scripts/update.py
 ├── runtime/src/ppt_narrator/
 └── tests/smoke.sh
 ```
@@ -88,9 +91,17 @@ The expected user experience is natural language first:
 Create an editable auto-playing narrated PPTX from this deck.
 ```
 
+For an existing result, the expected update experience is also natural language:
+
+```text
+Make slide 2 shorter and change slides 3-4 to the female voice.
+```
+
 The agent should then choose the right audio source, output directory, and
-verification steps. Non-technical users should not need to know install internals
-or runtime flags.
+verification steps. For updates, the Agent should convert the user's request
+into `update_request.json` and run `scripts/update.sh` against the previous
+`manifest.json`. Non-technical users should not need to know install internals,
+runtime flags, or the JSON contract.
 
 Agent default behavior:
 
@@ -98,6 +109,7 @@ Agent default behavior:
 - use speaker notes as narration text
 - use Doubao built-in TTS when configured
 - accept external per-slide audio from any TTS tool
+- revise previous results through a structured update action
 - write an editable PPTX, not an MP4
 - use `transition-sound` for presentation-app-compatible autoplay
 
@@ -133,6 +145,51 @@ python3 "$SKILL_DIR/scripts/run.sh" slides.pptx \
 
 The original PPTX is never modified.
 
+## Conversation Updates
+
+`ppt-narrator` has a built-in update action for revising an existing narrated
+result. The Agent interprets the conversation, writes a structured JSON request,
+and the runtime applies it deterministically. The runtime does not call an LLM
+or modify the source PPTX in place.
+
+Example request JSON:
+
+```json
+{
+  "slides": [
+    {
+      "index": 2,
+      "text": "Updated narration for slide 2."
+    }
+  ]
+}
+```
+
+Example update command:
+
+```bash
+SKILL_DIR=/path/to/installed/ppt-narrator
+"$SKILL_DIR/scripts/update.sh" \
+  --manifest output-dir/manifest.json \
+  --request update_request.json \
+  --output updated-output-dir \
+  --provider doubao \
+  --tts-config volcengine.local.json \
+  --overwrite
+```
+
+Supported request fields:
+
+| Field | Meaning |
+| --- | --- |
+| `slide_indexes` | Optional target slides for top-level `voice` or `regenerate_audio`. |
+| `voice` | Optional default voice for targeted regenerated slides. |
+| `regenerate_audio` | Force regeneration for targeted slides. |
+| `slides[].index` | Required one-based slide index. |
+| `slides[].text` | Replacement narration text for one slide. |
+| `slides[].voice` | Per-slide voice override. |
+| `slides[].audio_path` | External replacement audio file for one slide. |
+
 ## CLI Runtime
 
 The CLI is the implementation layer used by the Skill. It is still useful for
@@ -152,6 +209,7 @@ PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --overwrite
 PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --pptx-audio-format mp3 --direct-audio-start --overwrite
 PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --audio-trigger transition-sound --overwrite
 PYTHONPATH=src python3 -m ppt_narrator.cli slides.pptx --write-pptx --audio-input-dir path/to/audio --audio-trigger transition-sound --overwrite
+PYTHONPATH=src python3 -m ppt_narrator.update --manifest output-dir/manifest.json --request update_request.json --output updated-output-dir --provider dry-run --overwrite
 ```
 
 Dry-run agent smoke test:

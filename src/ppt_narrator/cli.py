@@ -118,7 +118,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--audio-trigger",
         choices=["media", "transition-sound"],
-        default="media",
+        default="transition-sound",
         help="How generated PPTX audio is triggered. transition-sound uses slide transition sound instead of a media object.",
     )
     return parser

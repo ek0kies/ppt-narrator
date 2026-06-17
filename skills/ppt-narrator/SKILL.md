@@ -41,6 +41,7 @@ Use this skill when the user asks for any of these:
 - generate TTS from speaker notes
 - make an auto-playing narrated PPTX that auto-plays audio and auto-advances slides
 - attach externally generated per-slide audio to a PPTX
+- update an already generated narrated PPTX by changing narration text, voice, audio, or target slides through conversation
 - avoid MP4 and keep the output editable as PPTX
 
 Do not use this skill for video export. MP4 is out of scope unless the user
@@ -59,6 +60,8 @@ Optional:
 - `audio_input_dir`: directory with `page-001.wav`, `page-002.mp3`, etc.
 - `voice`: TTS voice id; default is `zh_male_jieshuoxiaoming_uranus_bigtts`
 - `slide_limit`: first N slides for smoke tests
+- `manifest`: previous `manifest.json` for conversation updates
+- `update_request`: structured JSON created by the Agent from the user's conversation
 
 ## Outputs
 
@@ -101,6 +104,52 @@ Create a new editable PPTX that:
 10. Run `unzip -t <output.pptx>` when available.
 11. Reply with the generated PPTX path and any remaining warnings.
 
+## Conversation Update Runbook
+
+Use this action when the user asks to revise an already generated result, such
+as "make slide 3 shorter", "change slides 1-4 to a female voice", or "replace
+page 2 with this audio".
+
+Agent boundary:
+
+1. Do not ask the human to edit JSON by hand when the Agent can infer the
+   change from conversation.
+2. Convert the user's natural language request into a structured
+   `update_request.json`.
+3. Keep source PPTX files unchanged.
+4. Run `scripts/update.sh` with the previous `manifest.json`.
+5. Verify the new `manifest.json` and PPTX exist.
+6. Run `unzip -t <updated.pptx>` when available.
+7. Reply with the revised PPTX path and the slides that changed.
+
+The runtime does not interpret natural language. It applies a deterministic
+JSON contract so updates remain testable and portable across Agents.
+
+Update request example:
+
+```json
+{
+  "slides": [
+    {
+      "index": 2,
+      "text": "New narration for slide 2."
+    }
+  ]
+}
+```
+
+Supported update fields:
+
+| Field | Meaning |
+| --- | --- |
+| `slide_indexes` | Optional target slides for top-level `voice` or `regenerate_audio`. |
+| `voice` | Optional default voice for targeted regenerated slides. |
+| `regenerate_audio` | Force regeneration for targeted slides. |
+| `slides[].index` | Required one-based slide index. |
+| `slides[].text` | Replacement narration text for one slide. |
+| `slides[].voice` | Per-slide voice override. |
+| `slides[].audio_path` | External replacement audio file for one slide. |
+
 ## Commands
 
 Always prefer shell wrappers over invoking Python modules directly.
@@ -138,6 +187,18 @@ scripts/run.sh path/to/slides.pptx \
   --provider dry-run \
   --slide-limit 1 \
   --output output-dir \
+  --overwrite
+```
+
+Update existing result:
+
+```bash
+scripts/update.sh \
+  --manifest output-dir/manifest.json \
+  --request update_request.json \
+  --output updated-output-dir \
+  --provider doubao \
+  --tts-config path/to/volcengine.local.json \
   --overwrite
 ```
 

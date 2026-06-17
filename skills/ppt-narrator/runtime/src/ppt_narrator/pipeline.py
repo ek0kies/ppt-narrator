@@ -31,7 +31,7 @@ class NarrationOptions:
     pptx_audio_format: str = "source"
     visible_audio_icon: bool = False
     direct_audio_start: bool = False
-    audio_trigger: str = "media"
+    audio_trigger: str = "transition-sound"
 
 
 @dataclass(frozen=True)
@@ -127,9 +127,9 @@ def run_narration(options: NarrationOptions) -> NarrationResult:
             audio_trigger=options.audio_trigger,
         )
 
-    notes_markdown.write_text(_render_notes_markdown(input_pptx, slides), encoding="utf-8")
+    notes_markdown.write_text(render_notes_markdown(input_pptx, slides), encoding="utf-8")
     manifest_json.write_text(
-        json.dumps(_build_manifest(input_pptx, slides, audio_entries, narrated_pptx), ensure_ascii=False, indent=2),
+        json.dumps(build_manifest(input_pptx, slides, audio_entries, narrated_pptx), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
@@ -180,7 +180,7 @@ def _find_external_audio_file(source_dir: Path, slide_index: int) -> Path | None
     return None
 
 
-def _render_notes_markdown(input_pptx: Path, slides: list[SlideNotes]) -> str:
+def render_notes_markdown(input_pptx: Path, slides: list[SlideNotes]) -> str:
     lines = [
         f"# Narration Notes: {input_pptx.name}",
         "",
@@ -204,7 +204,7 @@ def _render_notes_markdown(input_pptx: Path, slides: list[SlideNotes]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _build_manifest(
+def build_manifest(
     input_pptx: Path,
     slides: list[SlideNotes],
     audio_entries: list[dict],

@@ -22,6 +22,8 @@ check "SKILL.md exists" test -f "${SKILL_DIR}/SKILL.md"
 check "runtime package exists" test -d "${SKILL_DIR}/runtime/src/ppt_narrator"
 check "run.py exists" test -f "${SKILL_DIR}/scripts/run.py"
 check "run.sh exists" test -f "${SKILL_DIR}/scripts/run.sh"
+check "update.py exists" test -f "${SKILL_DIR}/scripts/update.py"
+check "update.sh exists" test -f "${SKILL_DIR}/scripts/update.sh"
 check "python3 available" command -v "${PYTHON_BIN}"
 
 if command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
@@ -30,7 +32,9 @@ import sys
 if sys.version_info < (3, 9):
     raise SystemExit("python >= 3.9 is required")
 from ppt_narrator.cli import build_parser
+from ppt_narrator.update import build_parser as build_update_parser
 parser = build_parser()
+update_parser = build_update_parser()
 print("[ok] runtime import and CLI parser")
 PY
 fi

@@ -40,7 +40,7 @@ def write_auto_advance_pptx(
     embed_audio_format: str = "source",
     visible_audio_icon: bool = False,
     direct_audio_start: bool = False,
-    audio_trigger: str = "media",
+    audio_trigger: str = "transition-sound",
 ) -> Path:
     """Create a PPTX copy with per-slide audio assets and auto-advance timings."""
     if audio_trigger not in {"media", "transition-sound"}:

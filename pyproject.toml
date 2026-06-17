@@ -11,7 +11,7 @@ dependencies = []
 
 [project.scripts]
 ppt-narrator = "ppt_narrator.cli:main"
+ppt-narrator-update = "ppt_narrator.update:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

@@ -14,6 +14,7 @@
     "install": "scripts/install.sh",
     "doctor": "scripts/doctor.sh",
     "run": "scripts/run.sh",
+    "update": "scripts/update.sh",
     "smoke": "tests/smoke.sh"
   },
   "runtime": {
@@ -33,7 +34,11 @@
   },
   "inputs": {
     "required": ["pptx"],
-    "optional": ["output", "tts_config", "audio_input_dir", "voice", "slide_limit"]
+    "optional": ["output", "tts_config", "audio_input_dir", "voice", "slide_limit", "manifest", "update_request"]
+  },
+  "actions": {
+    "run": "Create a new narrated PPTX from a source PPTX.",
+    "update": "Apply a structured conversation update to a previous manifest and create a revised narrated PPTX."
   },
   "outputs": ["pptx", "notes_md", "manifest_json", "audio_dir", "verification"]
 }

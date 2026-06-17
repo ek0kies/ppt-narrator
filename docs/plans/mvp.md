@@ -52,3 +52,59 @@ Recommended option: A. The first risk is PPTX note extraction and output shape, 
 | Which real TTS provider first? | Determines auth and request schema | Doubao, implemented as the first real provider |
 | Output PPTX or MP4 first? | Determines next technical path | PPTX first; MP4 is out of scope |
 | Need custom cloned voice? | Affects provider selection and compliance | Default to built-in Doubao voice; clone is explicit mode |
+
+## Playback Compatibility Decision
+
+| Item | Decision |
+| --- | --- |
+| Default PPTX audio trigger | `transition-sound` |
+| Reason | Presentation apps can inconsistently autoplay embedded media objects on slides with existing timing or animation state. |
+| Compatibility path | Keep `media` available through explicit `--audio-trigger media` for tests and app-specific fallback checks. |
+| Verification | Unit tests assert default PPTX output uses transition sound and that explicit media timing still works. |
+
+## Conversation Update Action
+
+| Item | Decision |
+| --- | --- |
+| Business goal | Let a user ask an Agent to revise an already generated narrated deck without manually rerunning the whole workflow. |
+| User input | Natural language in the conversation, converted by the Agent into a structured update request JSON. |
+| Runtime input | Previous `manifest.json` plus `update_request.json`. |
+| Runtime output | New `notes.md`, `manifest.json`, optional regenerated audio files, and a new editable narrated PPTX. |
+| Boundary | The runtime does not interpret natural language and never modifies the source PPTX in place. |
+
+### Update Request Contract
+
+```json
+{
+  "slide_indexes": [1, 2],
+  "voice": "zh_female_xxx",
+  "regenerate_audio": true,
+  "slides": [
+    {
+      "index": 2,
+      "text": "Updated narration text.",
+      "voice": "zh_male_jieshuoxiaoming_uranus_bigtts",
+      "audio_path": "/absolute/path/page-002.wav"
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `slide_indexes` | Optional top-level target range for top-level voice or regeneration changes. If omitted with a top-level update, all slides are targeted. |
+| `voice` | Optional default voice for targeted regenerated slides. |
+| `regenerate_audio` | Optional flag to force audio regeneration for target slides even when text is unchanged. |
+| `slides[].index` | Required one-based slide index. |
+| `slides[].text` | Optional replacement narration text for one slide. |
+| `slides[].voice` | Optional per-slide voice override. |
+| `slides[].audio_path` | Optional external audio file for one slide. |
+
+### Implementation Plan
+
+| Step | Files | Change | Verification |
+| --- | --- | --- | --- |
+| Update runtime | `src/ppt_narrator/update.py` | Load previous manifest and notes, apply structured changes, reuse unchanged audio, regenerate affected audio, write new PPTX | Unit tests |
+| CLI wrapper | `skills/ppt-narrator/scripts/update.py`, `update.sh` | Agent-facing update entrypoint with installable runtime defaults | Smoke command |
+| Skill contract | `skills/ppt-narrator/skill.json`, `SKILL.md`, `README.md` | Expose `update` as a built-in action and document the Agent boundary | Manual review |
+| Runtime sync | `skills/ppt-narrator/runtime/src/ppt_narrator/` | Keep installable skill runtime aligned with repo source | Smoke test |
